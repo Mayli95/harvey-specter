@@ -28,11 +28,17 @@ export default function HeroSection() {
         className="absolute inset-0 w-full h-full object-cover object-[35%_top] pointer-events-none select-none md:hidden"
       />
 
-      {/* Frosted glass overlay at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-[349px] backdrop-blur-[10px] pointer-events-none" />
+      {/* Frosted glass overlay at bottom — fades out upward */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[349px] backdrop-blur-[10px] pointer-events-none"
+        style={{
+          WebkitMaskImage: "linear-gradient(to top, black 55%, transparent 100%)",
+          maskImage: "linear-gradient(to top, black 55%, transparent 100%)",
+        }}
+      />
 
       {/* ── Desktop layout (md+): flex-col with 240px gap ── */}
-      <div className="relative z-10 hidden h-full flex-col gap-[240px] px-8 md:flex">
+      <div className="relative hidden h-full flex-col gap-[240px] px-8 md:flex">
         <nav className="flex items-center justify-between py-6">
           <a
             href="#"
@@ -71,7 +77,7 @@ export default function HeroSection() {
                 [ Hello i&apos;m ]
               </p>
             </div>
-            <h1 className="font-inter font-medium w-full text-center text-[198px] capitalize leading-[1.1] tracking-[-0.07em] text-white mix-blend-overlay whitespace-pre-wrap">
+            <h1 className="font-inter font-medium w-full text-center text-[clamp(80px,13.75vw,198px)] capitalize leading-[1.1] tracking-[-0.07em] text-white mix-blend-overlay whitespace-nowrap">
               {`Harvey   Specter`}
             </h1>
           </div>
@@ -100,7 +106,7 @@ export default function HeroSection() {
       </div>
 
       {/* ── Mobile layout: nav top, content bottom ── */}
-      <div className="relative z-10 flex h-full flex-col justify-between px-4 pb-6 md:hidden">
+      <div className="relative flex h-full flex-col justify-between px-4 pb-6 md:hidden">
         <nav className="flex items-center justify-between py-6">
           <a
             href="#"
@@ -120,17 +126,17 @@ export default function HeroSection() {
         </nav>
 
         {/* Name + description group — pinned to bottom */}
-        <div className="flex h-[341px] flex-col items-center justify-between">
+        <div className="flex flex-col items-center gap-8">
           <div className="flex w-full flex-col items-center">
             <p className="font-mono text-[14px] leading-[1.1] uppercase text-white mix-blend-overlay">
               [ Hello i&apos;m ]
             </p>
-            <h1 className="font-inter font-medium w-full text-center text-[96px] capitalize leading-[0.8] tracking-[-0.07em] text-white mix-blend-overlay whitespace-pre-wrap">
-              {`Harvey   Specter`}
+            <h1 className="font-inter font-medium w-full text-center text-[96px] capitalize leading-[0.9] tracking-[-0.07em] text-white mix-blend-overlay whitespace-normal">
+              Harvey Specter
             </h1>
           </div>
 
-          <div className="flex w-[293px] flex-col gap-[17px]">
+          <div className="mx-auto flex w-[293px] flex-col gap-[17px]">
             <p className="font-inter font-bold italic text-[14px] uppercase leading-[1.1] tracking-[-0.04em] text-[#1f1f1f]">
               H.Studio is a{" "}
               <span className="font-normal">full-service</span>
