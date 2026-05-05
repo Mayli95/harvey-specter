@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 
-const HERO_IMAGE_DESKTOP =
-  "https://www.figma.com/api/mcp/asset/8b93e5b6-099b-4597-a734-0a51d57be8ff";
-const HERO_IMAGE_MOBILE =
-  "https://www.figma.com/api/mcp/asset/0184d919-bb5f-4e8e-8cf3-3d331b887da1";
+const HERO_IMAGE_DESKTOP = "/hero-desktop.png";
+const HERO_IMAGE_MOBILE = "/hero-mobile.png";
 
 const NAV_LINKS = ["About", "Services", "Projects", "News", "Contact"];
 
@@ -19,13 +17,13 @@ export default function HeroSection() {
         src={HERO_IMAGE_DESKTOP}
         alt=""
         aria-hidden
-        className="absolute inset-0 hidden w-full h-full object-cover object-[50%_20%] pointer-events-none select-none md:block"
+        className="absolute inset-0 hidden w-full h-full object-cover object-top pointer-events-none select-none md:block"
       />
       <img
         src={HERO_IMAGE_MOBILE}
         alt=""
         aria-hidden
-        className="absolute inset-0 w-full h-full object-cover object-[35%_top] pointer-events-none select-none md:hidden"
+        className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none select-none md:hidden"
       />
 
       {/* Frosted glass overlay at bottom — fades out upward */}
@@ -77,8 +75,9 @@ export default function HeroSection() {
                 [ Hello i&apos;m ]
               </p>
             </div>
-            <h1 className="font-inter font-medium w-full text-center text-[clamp(80px,13.75vw,198px)] capitalize leading-[1.1] tracking-[-0.07em] text-white mix-blend-overlay whitespace-nowrap">
-              {`Harvey   Specter`}
+            <h1 className="font-inter font-medium w-full flex justify-between items-baseline text-[clamp(80px,13.75vw,198px)] capitalize leading-[1.1] tracking-[-0.07em] text-white mix-blend-overlay">
+              <span>Harvey</span>
+              <span>Specter</span>
             </h1>
           </div>
 
@@ -131,12 +130,12 @@ export default function HeroSection() {
             <p className="font-mono text-[14px] leading-[1.1] uppercase text-white mix-blend-overlay">
               [ Hello i&apos;m ]
             </p>
-            <h1 className="font-inter font-medium w-full text-center text-[96px] capitalize leading-[0.9] tracking-[-0.07em] text-white mix-blend-overlay whitespace-normal">
-              Harvey Specter
+            <h1 className="font-inter font-medium w-full text-center text-[96px] capitalize leading-[0.8] tracking-[-0.07em] text-white mix-blend-overlay whitespace-pre-wrap">
+              {`Harvey   Specter`}
             </h1>
           </div>
 
-          <div className="mx-auto flex w-[293px] flex-col gap-[17px]">
+          <div className="mx-auto flex w-[293px] flex-col items-center gap-[17px] text-center">
             <p className="font-inter font-bold italic text-[14px] uppercase leading-[1.1] tracking-[-0.04em] text-[#1f1f1f]">
               H.Studio is a{" "}
               <span className="font-normal">full-service</span>
