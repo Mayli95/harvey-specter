@@ -8,45 +8,48 @@ const HERO_IMAGE_MOBILE  = "/hero-mobile.png";
 
 const NAV_LINKS = ["About", "Services", "Projects", "News", "Contact"];
 
-function LetsTalkButton({
-  href,
-  onClick,
-  className,
-}: {
-  href: string;
-  onClick?: () => void;
-  className?: string;
-}) {
-  const btnRef  = useRef<HTMLAnchorElement>(null);
-  const top     = useRef<HTMLSpanElement>(null);
-  const bottom  = useRef<HTMLSpanElement>(null);
+// Returns which edge the cursor entered/exited from
+function getDir(e: React.MouseEvent, el: HTMLElement) {
+  const { left, top, width, height } = el.getBoundingClientRect();
+  const x = e.clientX - left - width  / 2;
+  const y = e.clientY - top  - height / 2;
+  return Math.abs(x) > Math.abs(y)
+    ? x > 0 ? "right" : "left"
+    : y > 0 ? "bottom" : "top";
+}
 
-  const onEnter = () => {
-    gsap.killTweensOf([btnRef.current, top.current, bottom.current]);
-    gsap.to([top.current, bottom.current], {
-      y: "-100%",
-      duration: 0.45,
-      ease: "power3.out",
-    });
-    gsap.to(btnRef.current, {
-      scale: 1.04,
-      duration: 0.45,
-      ease: "power3.out",
-    });
+const OFFSET: Record<string, { xPercent: number; yPercent: number }> = {
+  left:   { xPercent: -100, yPercent: 0   },
+  right:  { xPercent:  100, yPercent: 0   },
+  top:    { xPercent: 0,    yPercent: -100 },
+  bottom: { xPercent: 0,    yPercent:  100 },
+};
+
+function LetsTalkButton({ href, onClick }: { href: string; onClick?: () => void }) {
+  const fillRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const btnRef  = useRef<HTMLAnchorElement>(null);
+
+  const onEnter = (e: React.MouseEvent) => {
+    const dir = getDir(e, btnRef.current!);
+    gsap.killTweensOf([fillRef.current, textRef.current]);
+    gsap.fromTo(
+      fillRef.current,
+      { ...OFFSET[dir], opacity: 1 },
+      { xPercent: 0, yPercent: 0, duration: 0.45, ease: "power3.out" }
+    );
+    gsap.to(textRef.current, { color: "#000000", duration: 0.2, ease: "none" });
   };
 
-  const onLeave = () => {
-    gsap.killTweensOf([btnRef.current, top.current, bottom.current]);
-    gsap.to([top.current, bottom.current], {
-      y: "0%",
+  const onLeave = (e: React.MouseEvent) => {
+    const dir = getDir(e, btnRef.current!);
+    gsap.killTweensOf([fillRef.current, textRef.current]);
+    gsap.to(fillRef.current, {
+      ...OFFSET[dir],
       duration: 0.45,
-      ease: "power3.out",
+      ease: "power3.in",
     });
-    gsap.to(btnRef.current, {
-      scale: 1,
-      duration: 0.45,
-      ease: "power3.out",
-    });
+    gsap.to(textRef.current, { color: "#ffffff", duration: 0.2, delay: 0.25, ease: "none" });
   };
 
   return (
@@ -56,13 +59,22 @@ function LetsTalkButton({
       onClick={onClick}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
-      className={`font-inter font-medium text-[14px] tracking-[-0.04em] rounded-[24px] bg-black text-white inline-flex items-center justify-center px-4 py-3 ${className ?? ""}`}
+      className="relative overflow-hidden inline-flex items-center justify-center rounded-[24px] bg-black px-4 py-3"
       style={{ willChange: "transform" }}
     >
-      {/* Two stacked copies — top slides out, bottom slides in */}
-      <span className="block overflow-hidden" style={{ height: "1em" }}>
-        <span ref={top}    className="block leading-none">Let&apos;s talk</span>
-        <span ref={bottom} className="block leading-none">Let&apos;s talk</span>
+      {/* Sliding fill */}
+      <span
+        ref={fillRef}
+        aria-hidden
+        className="absolute inset-0 bg-white rounded-[24px]"
+        style={{ transform: "translate(-100%, 0)" }}
+      />
+      {/* Text sits above fill */}
+      <span
+        ref={textRef}
+        className="relative z-10 font-inter font-medium text-[14px] tracking-[-0.04em] text-white whitespace-nowrap"
+      >
+        Let&apos;s talk
       </span>
     </a>
   );
@@ -147,7 +159,12 @@ export default function HeroSection() {
                 {" "}desing and art group specializing in branding, web design and
                 engineering.
               </p>
-              <LetsTalkButton href="#contact" />
+              <a
+                href="#contact"
+                className="font-inter font-medium inline-flex w-fit items-center justify-center text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white"
+              >
+                Let&apos;s talk
+              </a>
             </div>
           </div>
         </div>
@@ -193,7 +210,12 @@ export default function HeroSection() {
               {" "}desing and art group specializing in branding, web design and
               engineering.
             </p>
-            <LetsTalkButton href="#contact" />
+            <a
+              href="#contact"
+              className="font-inter font-medium inline-flex w-fit items-center justify-center text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white"
+            >
+              Let&apos;s talk
+            </a>
           </div>
         </div>
       </div>
@@ -226,7 +248,13 @@ export default function HeroSection() {
             ))}
           </nav>
           <div className="mt-6">
-            <LetsTalkButton href="#contact" onClick={() => setMenuOpen(false)} />
+            <a
+              href="#contact"
+              className="font-inter font-medium inline-flex items-center justify-center text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white"
+              onClick={() => setMenuOpen(false)}
+            >
+              Let&apos;s talk
+            </a>
           </div>
         </div>
       )}
