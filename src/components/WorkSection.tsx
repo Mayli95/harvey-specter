@@ -1,15 +1,10 @@
-// Desktop images (desktop Figma assets)
-const IMG_SURFERS   = "https://www.figma.com/api/mcp/asset/e55be3a3-3d99-4d4d-9b07-cfb4bfdcf34b";
-const IMG_CYBERPUNK = "https://www.figma.com/api/mcp/asset/4546072a-05c3-4583-9f2b-118a712aac47";
-const IMG_AGENCY    = "https://www.figma.com/api/mcp/asset/586d4e62-39b5-4427-a13b-60a8c66b5c89";
-const IMG_MINIMAL   = "https://www.figma.com/api/mcp/asset/c63c3876-d0b3-4e82-9dcc-b4ebc9a80250";
-
-const PROJECTS = [
-  { img: IMG_SURFERS,   title: "Surfers Paradise",   tags: ["Social Media", "Photography"], tallDesk: true  },
-  { img: IMG_CYBERPUNK, title: "Cyberpunk Caffe",    tags: ["Social Media", "Photography"], tallDesk: false },
-  { img: IMG_AGENCY,    title: "Agency 976",         tags: ["Social Media", "Photography"], tallDesk: false },
-  { img: IMG_MINIMAL,   title: "Minimal Playground", tags: ["Social Media", "Photography"], tallDesk: true  },
-];
+export type Project = {
+  _id: string;
+  title: string;
+  imageUrl: string | null;
+  tags: string[];
+  isTall: boolean;
+};
 
 function ArrowIcon() {
   return (
@@ -39,7 +34,7 @@ function ProjectCard({
   tags,
   tall,
 }: {
-  img: string;
+  img: string | null;
   title: string;
   tags: string[];
   tall: boolean;
@@ -54,11 +49,15 @@ function ProjectCard({
           "max-md:h-[520px]",
         ].join(" ")}
       >
-        <img
-          src={img}
-          alt={title}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {img ? (
+          <img
+            src={img}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-neutral-200" />
+        )}
         <div className="relative flex gap-3 items-center">
           {tags.map((t) => (
             <Tag key={t} label={t} />
@@ -103,7 +102,7 @@ function BracketCTA() {
   );
 }
 
-export default function WorkSection() {
+export default function WorkSection({ projects }: { projects: Project[] }) {
   return (
     <section className="bg-white w-full px-8 py-20 max-md:px-4 max-md:py-12">
 
@@ -139,24 +138,32 @@ export default function WorkSection() {
 
       {/* ── Desktop: two staggered columns ── */}
       <div className="hidden md:flex gap-6 items-end">
-        {/* Left column — stretches to match right column height, spreads items between */}
+        {/* Left column */}
         <div className="flex flex-1 flex-col justify-between self-stretch">
-          <ProjectCard {...PROJECTS[0]} tall={PROJECTS[0].tallDesk} />
-          <ProjectCard {...PROJECTS[1]} tall={PROJECTS[1].tallDesk} />
+          {projects[0] && (
+            <ProjectCard img={projects[0].imageUrl} title={projects[0].title} tags={projects[0].tags} tall={projects[0].isTall} />
+          )}
+          {projects[1] && (
+            <ProjectCard img={projects[1].imageUrl} title={projects[1].title} tags={projects[1].tags} tall={projects[1].isTall} />
+          )}
           <BracketCTA />
         </div>
 
-        {/* Right column — 240px top offset + 117px gap between cards */}
+        {/* Right column — 240px top offset */}
         <div className="flex flex-1 flex-col gap-[117px] pt-[240px]">
-          <ProjectCard {...PROJECTS[2]} tall={PROJECTS[2].tallDesk} />
-          <ProjectCard {...PROJECTS[3]} tall={PROJECTS[3].tallDesk} />
+          {projects[2] && (
+            <ProjectCard img={projects[2].imageUrl} title={projects[2].title} tags={projects[2].tags} tall={projects[2].isTall} />
+          )}
+          {projects[3] && (
+            <ProjectCard img={projects[3].imageUrl} title={projects[3].title} tags={projects[3].tags} tall={projects[3].isTall} />
+          )}
         </div>
       </div>
 
       {/* ── Mobile: single column ── */}
       <div className="flex md:hidden flex-col gap-12">
-        {PROJECTS.map((p) => (
-          <ProjectCard key={p.title} {...p} tall={false} />
+        {projects.map((p) => (
+          <ProjectCard key={p._id} img={p.imageUrl} title={p.title} tags={p.tags} tall={false} />
         ))}
         <BracketCTA />
       </div>
