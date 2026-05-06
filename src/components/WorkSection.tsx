@@ -1,3 +1,9 @@
+"use client";
+
+import { useRef } from "react";
+import gsap from "gsap";
+import LetsTalkButton from "./ui/LetsTalkButton";
+
 export type Project = {
   _id: string;
   title: string;
@@ -22,7 +28,7 @@ function ArrowIcon() {
 
 function Tag({ label }: { label: string }) {
   return (
-    <span className="backdrop-blur-[10px] bg-white/30 px-2 py-1 rounded-full font-inter font-medium text-[14px] tracking-[-0.04em] text-[#111] whitespace-nowrap">
+    <span className="bg-neutral-800/70 px-3 py-1 rounded-full font-inter font-medium text-[14px] tracking-[-0.04em] text-white whitespace-nowrap">
       {label}
     </span>
   );
@@ -53,20 +59,20 @@ function ProjectCard({
           <img
             src={img}
             alt={title}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           />
         ) : (
-          <div className="absolute inset-0 bg-neutral-200" />
+          <div className="absolute inset-0 bg-neutral-200 pointer-events-none" />
         )}
-        <div className="relative flex gap-3 items-center">
-          {tags.map((t) => (
+        <div className="relative flex gap-3 items-center pointer-events-none">
+          {[...new Set(tags)].map((t) => (
             <Tag key={t} label={t} />
           ))}
         </div>
       </div>
 
       {/* Title + arrow */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pointer-events-none">
         <p className="font-inter font-black leading-[1.1] tracking-[-0.04em] uppercase text-black text-[36px] max-md:text-[24px] whitespace-nowrap">
           {title}
         </p>
@@ -91,23 +97,54 @@ function BracketCTA() {
           Discover how my creativity transforms ideas into impactful digital
           experiences — schedule a call with me to get started.
         </p>
-        <a
-          href="#contact"
-          className="font-inter font-medium text-[14px] tracking-[-0.04em] bg-black text-white rounded-full px-4 py-3 w-fit"
-        >
-          Let&apos;s talk
-        </a>
+        <LetsTalkButton href="#contact" />
       </div>
     </div>
   );
 }
 
+function useCardHover(count: number) {
+  const refs   = useRef<(HTMLDivElement | null)[]>([]);
+  const active = useRef<number | null>(null);
+
+  const enter = (i: number) => {
+    if (active.current === i) return;
+    active.current = i;
+    refs.current.forEach((el, j) => {
+      if (!el) return;
+      if (j === i) {
+        gsap.set(el, { zIndex: 10 });
+        gsap.to(el, { scale: 1.04, duration: 0.5, ease: "power2.out", overwrite: "auto" });
+      } else {
+        gsap.to(el, { opacity: 0.55, scale: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+      }
+    });
+  };
+
+  const leave = (i: number) => {
+    if (active.current !== i) return;
+    active.current = null;
+    refs.current.forEach((el) => {
+      if (!el) return;
+      gsap.set(el, { zIndex: 0 });
+      gsap.to(el, { scale: 1, opacity: 1, duration: 0.5, ease: "power2.inOut", overwrite: "auto" });
+    });
+  };
+
+  // suppress unused-variable warning for count
+  void count;
+
+  return { refs, enter, leave };
+}
+
 export default function WorkSection({ projects }: { projects: Project[] }) {
+  const d = useCardHover(projects.length); // desktop
+  const m = useCardHover(projects.length); // mobile
+
   return (
     <section className="bg-white w-full px-8 py-20 max-md:px-4 max-md:py-12">
 
       {/* ── Header ── */}
-      {/* Desktop */}
       <div className="hidden md:flex items-start justify-between mb-[61px]">
         <div className="flex items-start gap-[10px]">
           <div className="font-inter font-light text-[96px] leading-[0.86] tracking-[-0.08em] uppercase text-black">
@@ -116,7 +153,6 @@ export default function WorkSection({ projects }: { projects: Project[] }) {
           </div>
           <span className="font-mono text-[14px] leading-[1.1] text-[#1f1f1f] mt-1">004</span>
         </div>
-        {/* [ portfolio ] rotated vertically */}
         <div className="flex items-center justify-center w-[15px] h-[110px]">
           <p className="font-mono text-[14px] leading-[1.1] uppercase text-[#1f1f1f] whitespace-nowrap -rotate-90">
             [ portfolio ]
@@ -124,7 +160,6 @@ export default function WorkSection({ projects }: { projects: Project[] }) {
         </div>
       </div>
 
-      {/* Mobile header */}
       <div className="flex md:hidden flex-col gap-4 mb-8">
         <p className="font-mono text-[14px] leading-[1.1] uppercase text-[#1f1f1f]">[ portfolio ]</p>
         <div className="flex items-start justify-between">
@@ -141,29 +176,65 @@ export default function WorkSection({ projects }: { projects: Project[] }) {
         {/* Left column */}
         <div className="flex flex-1 flex-col justify-between self-stretch">
           {projects[0] && (
-            <ProjectCard img={projects[0].imageUrl} title={projects[0].title} tags={projects[0].tags} tall={projects[0].isTall} />
+            <div
+              ref={(el) => { d.refs.current[0] = el; }}
+              onMouseEnter={() => d.enter(0)}
+              onMouseLeave={() => d.leave(0)}
+              className="relative cursor-pointer"
+            >
+              <ProjectCard img={projects[0].imageUrl} title={projects[0].title} tags={projects[0].tags} tall={projects[0].isTall} />
+            </div>
           )}
           {projects[1] && (
-            <ProjectCard img={projects[1].imageUrl} title={projects[1].title} tags={projects[1].tags} tall={projects[1].isTall} />
+            <div
+              ref={(el) => { d.refs.current[1] = el; }}
+              onMouseEnter={() => d.enter(1)}
+              onMouseLeave={() => d.leave(1)}
+              className="relative cursor-pointer"
+            >
+              <ProjectCard img={projects[1].imageUrl} title={projects[1].title} tags={projects[1].tags} tall={projects[1].isTall} />
+            </div>
           )}
           <BracketCTA />
         </div>
 
-        {/* Right column — 240px top offset */}
+        {/* Right column */}
         <div className="flex flex-1 flex-col gap-[117px] pt-[240px]">
           {projects[2] && (
-            <ProjectCard img={projects[2].imageUrl} title={projects[2].title} tags={projects[2].tags} tall={projects[2].isTall} />
+            <div
+              ref={(el) => { d.refs.current[2] = el; }}
+              onMouseEnter={() => d.enter(2)}
+              onMouseLeave={() => d.leave(2)}
+              className="relative cursor-pointer"
+            >
+              <ProjectCard img={projects[2].imageUrl} title={projects[2].title} tags={projects[2].tags} tall={projects[2].isTall} />
+            </div>
           )}
           {projects[3] && (
-            <ProjectCard img={projects[3].imageUrl} title={projects[3].title} tags={projects[3].tags} tall={projects[3].isTall} />
+            <div
+              ref={(el) => { d.refs.current[3] = el; }}
+              onMouseEnter={() => d.enter(3)}
+              onMouseLeave={() => d.leave(3)}
+              className="relative cursor-pointer"
+            >
+              <ProjectCard img={projects[3].imageUrl} title={projects[3].title} tags={projects[3].tags} tall={projects[3].isTall} />
+            </div>
           )}
         </div>
       </div>
 
       {/* ── Mobile: single column ── */}
       <div className="flex md:hidden flex-col gap-12">
-        {projects.map((p) => (
-          <ProjectCard key={p._id} img={p.imageUrl} title={p.title} tags={p.tags} tall={false} />
+        {projects.map((p, i) => (
+          <div
+            key={p._id}
+            ref={(el) => { m.refs.current[i] = el; }}
+            onMouseEnter={() => m.enter(i)}
+            onMouseLeave={() => m.leave(i)}
+            className="relative cursor-pointer"
+          >
+            <ProjectCard img={p.imageUrl} title={p.title} tags={p.tags} tall={false} />
+          </div>
         ))}
         <BracketCTA />
       </div>

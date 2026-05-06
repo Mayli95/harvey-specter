@@ -1,71 +1,71 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useEffect } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import LetsTalkButton from "./ui/LetsTalkButton";
 
 const HERO_IMAGE_DESKTOP = "/hero-desktop.png";
 const HERO_IMAGE_MOBILE  = "/hero-mobile.png";
 
-const NAV_LINKS = ["About", "Services", "Projects", "News", "Contact"];
-
-function LetsTalkButton({ href, onClick }: { href: string; onClick?: () => void }) {
-  const btnRef = useRef<HTMLAnchorElement>(null);
-
-  const onMouseMove = (e: React.MouseEvent) => {
-    const btn = btnRef.current!;
-    const { left, top, width, height } = btn.getBoundingClientRect();
-    const x = (e.clientX - left - width  / 2) * 0.3;
-    const y = (e.clientY - top  - height / 2) * 0.3;
-    gsap.to(btn, { x, y, duration: 0.4, ease: "power2.out" });
-  };
-
-  const onMouseEnter = () => {
-    gsap.to(btnRef.current, {
-      backgroundColor: "#3a3a3a",
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  };
-
-  const onMouseLeave = () => {
-    gsap.to(btnRef.current, {
-      x: 0,
-      y: 0,
-      backgroundColor: "#000000",
-      duration: 0.8,
-      ease: "elastic.out(1, 0.4)",
-    });
-  };
-
-  return (
-    <a
-      ref={btnRef}
-      href={href}
-      onClick={onClick}
-      onMouseMove={onMouseMove}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      className="font-inter font-medium text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white inline-flex items-center justify-center whitespace-nowrap"
-      style={{ willChange: "transform" }}
-    >
-      Let&apos;s talk
-    </a>
-  );
-}
-
 export default function HeroSection() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const sectionRef    = useRef<HTMLElement>(null);
+
+  // Parallax refs
+  const bgDesktopRef  = useRef<HTMLImageElement>(null);
+  const bgMobileRef   = useRef<HTMLImageElement>(null);
+  const helloRef      = useRef<HTMLParagraphElement>(null);
+  const harveyRef     = useRef<HTMLSpanElement>(null);
+  const specterRef    = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const section = sectionRef.current;
+    const hello   = helloRef.current;
+    const harvey  = harveyRef.current;
+    const specter = specterRef.current;
+    const bgD     = bgDesktopRef.current;
+    const bgM     = bgMobileRef.current;
+
+    if (!section || !hello || !harvey || !specter) return;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+      },
+    });
+
+    tl.to(hello,   { x: "-55vw", ease: "none" }, 0)
+      .to(harvey,  { x: "-60vw", ease: "none" }, 0)
+      .to(specter, { x:  "60vw", ease: "none" }, 0)
+      .to([bgD, bgM].filter(Boolean), {
+        scale: 1.25,
+        transformOrigin: "top center",
+        ease: "none",
+      }, 0);
+
+    return () => {
+      tl.scrollTrigger?.kill();
+      tl.kill();
+    };
+  }, []);
 
   return (
-    <section className="relative h-[847px] w-full overflow-hidden">
+    <section ref={sectionRef} className="relative h-[847px] w-full overflow-hidden">
       {/* Background images */}
       <img
+        ref={bgDesktopRef}
         src={HERO_IMAGE_DESKTOP}
         alt=""
         aria-hidden
         className="absolute inset-0 hidden w-full h-full object-cover object-top pointer-events-none select-none md:block"
       />
       <img
+        ref={bgMobileRef}
         src={HERO_IMAGE_MOBILE}
         alt=""
         aria-hidden
@@ -83,41 +83,20 @@ export default function HeroSection() {
 
       {/* ── Desktop layout ── */}
       <div className="relative hidden h-full flex-col gap-[240px] px-8 md:flex">
-        <nav className="flex items-center justify-between py-6">
-          <a
-            href="#"
-            className="font-inter font-semibold text-[16px] capitalize tracking-[-0.04em] text-black"
-          >
-            H.Studio
-          </a>
-
-          <ul className="flex list-none items-center gap-14">
-            {NAV_LINKS.map((link) => (
-              <li key={link}>
-                <a
-                  href={`#${link.toLowerCase()}`}
-                  className="font-inter font-semibold text-[16px] capitalize tracking-[-0.04em] text-black transition-opacity hover:opacity-70"
-                >
-                  {link}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          <LetsTalkButton href="#contact" />
-        </nav>
+        {/* Spacer matching the fixed nav height so content sits in the same position */}
+        <div className="h-[72px]" />
 
         {/* Hero content */}
         <div className="flex w-full flex-col">
           <div>
             <div className="px-[18px]">
-              <p className="font-mono text-[14px] leading-[1.1] uppercase text-white mix-blend-overlay">
+              <p ref={helloRef} className="font-mono text-[14px] leading-[1.1] uppercase text-white mix-blend-overlay">
                 [ Hello i&apos;m ]
               </p>
             </div>
             <h1 className="font-inter font-medium w-full flex justify-between items-baseline text-[clamp(80px,13.75vw,198px)] capitalize leading-[1.1] tracking-[-0.07em] text-white mix-blend-overlay">
-              <span>Harvey</span>
-              <span>Specter</span>
+              <span ref={harveyRef}>Harvey</span>
+              <span ref={specterRef}>Specter</span>
             </h1>
           </div>
 
@@ -139,25 +118,7 @@ export default function HeroSection() {
       </div>
 
       {/* ── Mobile layout ── */}
-      <div className="relative flex h-full flex-col justify-between px-4 pb-6 md:hidden">
-        <nav className="flex items-center justify-between py-6">
-          <a
-            href="#"
-            className="font-inter font-semibold text-[16px] capitalize tracking-[-0.04em] text-black"
-          >
-            H.Studio
-          </a>
-          <button
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open navigation menu"
-            className="flex h-6 w-6 flex-col items-center justify-center gap-[5px]"
-          >
-            <span className="block h-[2px] w-5 bg-black" />
-            <span className="block h-[2px] w-5 bg-black" />
-            <span className="block h-[2px] w-5 bg-black" />
-          </button>
-        </nav>
-
+      <div className="relative flex h-full flex-col justify-end px-4 pb-6 md:hidden">
         <div className="flex flex-col items-center gap-8">
           <div className="flex w-full flex-col items-center">
             <p className="font-mono text-[14px] leading-[1.1] uppercase text-white mix-blend-overlay">
@@ -183,38 +144,6 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Mobile full-screen menu */}
-      {menuOpen && (
-        <div className="absolute inset-0 z-30 flex flex-col bg-white px-4 py-6 md:hidden">
-          <div className="mb-8 flex items-center justify-between">
-            <span className="font-inter font-semibold text-[16px] capitalize tracking-[-0.04em] text-black">
-              H.Studio
-            </span>
-            <button
-              onClick={() => setMenuOpen(false)}
-              aria-label="Close navigation menu"
-              className="text-xl leading-none text-black"
-            >
-              ✕
-            </button>
-          </div>
-          <nav className="flex flex-col">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                className="font-inter font-semibold border-b border-zinc-100 py-4 text-[16px] capitalize tracking-[-0.04em] text-black"
-                onClick={() => setMenuOpen(false)}
-              >
-                {link}
-              </a>
-            ))}
-          </nav>
-          <div className="mt-6">
-            <LetsTalkButton href="#contact" onClick={() => setMenuOpen(false)} />
-          </div>
-        </div>
-      )}
     </section>
   );
 }

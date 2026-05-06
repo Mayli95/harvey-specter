@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import BioSection from "@/components/BioSection";
 import AboutSection from "@/components/AboutSection";
@@ -30,14 +31,17 @@ export default async function Home() {
 
   return (
     <main>
-      <HeroSection />
-      <BioSection />
-      <AboutSection />
-      <PhotoSection />
-      <ServicesSection />
-      <WorkSection projects={projects} />
-      <TestimonialsSection />
-      <NewsSection />
+      <Navbar />
+      <div className="relative z-10">
+        <HeroSection />
+        <BioSection />
+        <AboutSection />
+        <PhotoSection />
+        <ServicesSection />
+        <WorkSection projects={projects} />
+        <TestimonialsSection />
+        <NewsSection />
+      </div>
       <FooterSection />
     </main>
   );

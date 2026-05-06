@@ -1,6 +1,10 @@
+"use client";
+
+import LetsTalkButton from "./ui/LetsTalkButton";
+
 export default function FooterSection() {
   return (
-    <footer className="bg-black w-full px-8 pt-12 max-md:px-4">
+    <footer data-nav-theme="dark" className="sticky bottom-0 z-0 bg-black w-full px-8 pt-12 max-md:px-4">
 
       {/* ── Desktop ── */}
       <div className="hidden md:flex flex-col gap-[120px]">
@@ -14,12 +18,7 @@ export default function FooterSection() {
               <p className="font-inter font-light italic text-[24px] leading-[1.1] tracking-[-0.04em] uppercase text-white">
                 Have a <span className="font-black not-italic">project</span> in mind?
               </p>
-              <a
-                href="#contact"
-                className="font-inter font-medium text-[14px] tracking-[-0.04em] text-white border border-white rounded-[24px] px-4 py-3 w-fit whitespace-nowrap"
-              >
-                Let&apos;s talk
-              </a>
+              <LetsTalkButton href="#contact" variant="outline" />
             </div>
 
             {/* Centre socials */}
@@ -79,12 +78,7 @@ export default function FooterSection() {
               <p className="font-inter font-light italic text-[24px] leading-[1.1] tracking-[-0.04em] uppercase text-white">
                 Have a <span className="font-black not-italic">project</span> in mind?
               </p>
-              <a
-                href="#contact"
-                className="font-inter font-medium text-[14px] tracking-[-0.04em] text-white border border-white rounded-[24px] px-4 py-3 w-fit whitespace-nowrap"
-              >
-                Let&apos;s talk
-              </a>
+              <LetsTalkButton href="#contact" variant="outline" />
             </div>
             <p className="font-inter font-normal text-[18px] leading-[1.1] tracking-[-0.04em] uppercase text-white">Facebook</p>
             <p className="font-inter font-normal text-[18px] leading-[1.1] tracking-[-0.04em] uppercase text-white">Instagram</p>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import gsap from "gsap";
 
 const IMG_1 = "https://www.figma.com/api/mcp/asset/eed0d90b-959f-46be-8862-025f6caafc5c";
 const IMG_2 = "https://www.figma.com/api/mcp/asset/25a5498c-1bb1-43d9-8df7-447626b6e8bb";
@@ -27,10 +28,19 @@ function NorthEastArrow() {
 }
 
 function ArticleCard({ img, text, tall }: { img: string; text: string; tall: boolean }) {
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  const onEnter = () => {
+    gsap.to(imgRef.current, { scale: 1.08, duration: 0.5, ease: "power2.out", overwrite: "auto" });
+  };
+  const onLeave = () => {
+    gsap.to(imgRef.current, { scale: 1, duration: 0.6, ease: "power2.inOut", overwrite: "auto" });
+  };
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 cursor-pointer" onMouseEnter={onEnter} onMouseLeave={onLeave}>
       <div className={`relative w-full overflow-hidden ${tall ? "h-[469px]" : "h-[398px]"}`}>
-        <img src={img} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img ref={imgRef} src={img} alt="" className="absolute inset-0 w-full h-full object-cover" />
       </div>
       <p className="font-inter font-normal text-[14px] leading-[1.3] tracking-[-0.04em] text-[#1f1f1f]">{text}</p>
       <a
@@ -75,7 +85,6 @@ function MobileCarousel() {
         </div>
       </div>
 
-      {/* Dot indicators */}
       <div className="flex justify-center gap-2 mt-6">
         {ARTICLES.map((_, i) => (
           <button
@@ -99,7 +108,6 @@ export default function NewsSection() {
       {/* ── Desktop ── */}
       <div className="hidden md:flex items-start gap-6 px-8 py-[120px]">
 
-        {/* Rotated heading column */}
         <div className="flex items-center justify-center w-[110px] h-[706px] shrink-0">
           <div className="-rotate-90 flex-none">
             <p className="font-inter font-light text-[64px] leading-[0.86] tracking-[-0.08em] uppercase text-black whitespace-nowrap">
@@ -111,7 +119,6 @@ export default function NewsSection() {
           </div>
         </div>
 
-        {/* Three staggered cards */}
         <div className="flex flex-1 items-start gap-[31px]">
           <div className="flex-1">
             <ArticleCard img={ARTICLES[0].img} text={ARTICLES[0].text} tall />
