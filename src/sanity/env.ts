@@ -1,0 +1,17 @@
+function assertValue<T>(v: T | undefined, errorMessage: string): T {
+  if (v === undefined) throw new Error(errorMessage);
+  return v;
+}
+
+export const apiVersion =
+  process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2025-05-05";
+
+export const projectId = assertValue(
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  "Missing env var: NEXT_PUBLIC_SANITY_PROJECT_ID"
+);
+
+export const dataset = assertValue(
+  process.env.NEXT_PUBLIC_SANITY_DATASET,
+  "Missing env var: NEXT_PUBLIC_SANITY_DATASET"
+);
