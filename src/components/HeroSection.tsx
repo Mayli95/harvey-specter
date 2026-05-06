@@ -8,48 +8,33 @@ const HERO_IMAGE_MOBILE  = "/hero-mobile.png";
 
 const NAV_LINKS = ["About", "Services", "Projects", "News", "Contact"];
 
-// Returns which edge the cursor entered/exited from
-function getDir(e: React.MouseEvent, el: HTMLElement) {
-  const { left, top, width, height } = el.getBoundingClientRect();
-  const x = e.clientX - left - width  / 2;
-  const y = e.clientY - top  - height / 2;
-  return Math.abs(x) > Math.abs(y)
-    ? x > 0 ? "right" : "left"
-    : y > 0 ? "bottom" : "top";
-}
-
-const OFFSET: Record<string, { xPercent: number; yPercent: number }> = {
-  left:   { xPercent: -100, yPercent: 0   },
-  right:  { xPercent:  100, yPercent: 0   },
-  top:    { xPercent: 0,    yPercent: -100 },
-  bottom: { xPercent: 0,    yPercent:  100 },
-};
-
 function LetsTalkButton({ href, onClick }: { href: string; onClick?: () => void }) {
-  const fillRef = useRef<HTMLSpanElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-  const btnRef  = useRef<HTMLAnchorElement>(null);
+  const btnRef = useRef<HTMLAnchorElement>(null);
 
-  const onEnter = (e: React.MouseEvent) => {
-    const dir = getDir(e, btnRef.current!);
-    gsap.killTweensOf([fillRef.current, textRef.current]);
-    gsap.fromTo(
-      fillRef.current,
-      { ...OFFSET[dir], opacity: 1 },
-      { xPercent: 0, yPercent: 0, duration: 0.45, ease: "power3.out" }
-    );
-    gsap.to(textRef.current, { color: "#000000", duration: 0.2, ease: "none" });
+  const onMouseMove = (e: React.MouseEvent) => {
+    const btn = btnRef.current!;
+    const { left, top, width, height } = btn.getBoundingClientRect();
+    const x = (e.clientX - left - width  / 2) * 0.3;
+    const y = (e.clientY - top  - height / 2) * 0.3;
+    gsap.to(btn, { x, y, duration: 0.4, ease: "power2.out" });
   };
 
-  const onLeave = (e: React.MouseEvent) => {
-    const dir = getDir(e, btnRef.current!);
-    gsap.killTweensOf([fillRef.current, textRef.current]);
-    gsap.to(fillRef.current, {
-      ...OFFSET[dir],
-      duration: 0.45,
-      ease: "power3.in",
+  const onMouseEnter = () => {
+    gsap.to(btnRef.current, {
+      backgroundColor: "#3a3a3a",
+      duration: 0.3,
+      ease: "power2.out",
     });
-    gsap.to(textRef.current, { color: "#ffffff", duration: 0.2, delay: 0.25, ease: "none" });
+  };
+
+  const onMouseLeave = () => {
+    gsap.to(btnRef.current, {
+      x: 0,
+      y: 0,
+      backgroundColor: "#000000",
+      duration: 0.8,
+      ease: "elastic.out(1, 0.4)",
+    });
   };
 
   return (
@@ -57,25 +42,13 @@ function LetsTalkButton({ href, onClick }: { href: string; onClick?: () => void 
       ref={btnRef}
       href={href}
       onClick={onClick}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      className="relative overflow-hidden inline-flex items-center justify-center rounded-[24px] bg-black px-4 py-3"
+      onMouseMove={onMouseMove}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className="font-inter font-medium text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white inline-flex items-center justify-center whitespace-nowrap"
       style={{ willChange: "transform" }}
     >
-      {/* Sliding fill */}
-      <span
-        ref={fillRef}
-        aria-hidden
-        className="absolute inset-0 bg-white rounded-[24px]"
-        style={{ transform: "translate(-100%, 0)" }}
-      />
-      {/* Text sits above fill */}
-      <span
-        ref={textRef}
-        className="relative z-10 font-inter font-medium text-[14px] tracking-[-0.04em] text-white whitespace-nowrap"
-      >
-        Let&apos;s talk
-      </span>
+      Let&apos;s talk
     </a>
   );
 }
@@ -159,12 +132,7 @@ export default function HeroSection() {
                 {" "}desing and art group specializing in branding, web design and
                 engineering.
               </p>
-              <a
-                href="#contact"
-                className="font-inter font-medium inline-flex w-fit items-center justify-center text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white"
-              >
-                Let&apos;s talk
-              </a>
+              <LetsTalkButton href="#contact" />
             </div>
           </div>
         </div>
@@ -210,12 +178,7 @@ export default function HeroSection() {
               {" "}desing and art group specializing in branding, web design and
               engineering.
             </p>
-            <a
-              href="#contact"
-              className="font-inter font-medium inline-flex w-fit items-center justify-center text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white"
-            >
-              Let&apos;s talk
-            </a>
+            <LetsTalkButton href="#contact" />
           </div>
         </div>
       </div>
@@ -248,13 +211,7 @@ export default function HeroSection() {
             ))}
           </nav>
           <div className="mt-6">
-            <a
-              href="#contact"
-              className="font-inter font-medium inline-flex items-center justify-center text-[14px] tracking-[-0.04em] rounded-[24px] bg-black px-4 py-3 text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              Let&apos;s talk
-            </a>
+            <LetsTalkButton href="#contact" onClick={() => setMenuOpen(false)} />
           </div>
         </div>
       )}
