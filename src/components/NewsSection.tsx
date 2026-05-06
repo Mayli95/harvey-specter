@@ -1,24 +1,15 @@
-// Image assets — expire in 7 days
+"use client";
+
+import { useState } from "react";
+
 const IMG_1 = "https://www.figma.com/api/mcp/asset/eed0d90b-959f-46be-8862-025f6caafc5c";
 const IMG_2 = "https://www.figma.com/api/mcp/asset/25a5498c-1bb1-43d9-8df7-447626b6e8bb";
 const IMG_3 = "https://www.figma.com/api/mcp/asset/4d2199ad-7a9c-4be8-84b6-191d362856f4";
 
 const ARTICLES = [
-  {
-    img: IMG_1,
-    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    offset: false,
-  },
-  {
-    img: IMG_2,
-    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    offset: true,
-  },
-  {
-    img: IMG_3,
-    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    offset: false,
-  },
+  { img: IMG_1, text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
+  { img: IMG_2, text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
+  { img: IMG_3, text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
 ];
 
 function NorthEastArrow() {
@@ -49,6 +40,54 @@ function ArticleCard({ img, text, tall }: { img: string; text: string; tall: boo
         <span className="font-inter font-medium text-[14px] tracking-[-0.04em] whitespace-nowrap">Read more</span>
         <NorthEastArrow />
       </a>
+    </div>
+  );
+}
+
+function MobileCarousel() {
+  const [current, setCurrent] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  const prev = () => setCurrent((c) => Math.max(0, c - 1));
+  const next = () => setCurrent((c) => Math.min(ARTICLES.length - 1, c + 1));
+
+  const onTouchStart = (e: React.TouchEvent) => setTouchStartX(e.touches[0].clientX);
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 50) next();
+    else if (diff < -50) prev();
+    setTouchStartX(null);
+  };
+
+  return (
+    <div>
+      <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${current * 100}%)` }}
+        >
+          {ARTICLES.map((a, i) => (
+            <div key={i} className="w-full shrink-0">
+              <ArticleCard img={a.img} text={a.text} tall={false} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="flex justify-center gap-2 mt-6">
+        {ARTICLES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+              i === current ? "bg-black" : "bg-black/20"
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -93,15 +132,7 @@ export default function NewsSection() {
         <p className="font-inter font-light text-[32px] leading-[0.86] tracking-[-0.08em] uppercase text-black mb-8">
           Keep up with my latest news &amp; achievements
         </p>
-
-        {/* Horizontally scrollable cards */}
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
-          {ARTICLES.map((a, i) => (
-            <div key={i} className="w-[300px] shrink-0">
-              <ArticleCard img={a.img} text={a.text} tall={false} />
-            </div>
-          ))}
-        </div>
+        <MobileCarousel />
       </div>
 
     </section>
