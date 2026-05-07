@@ -1,8 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useLayoutEffect, useState } from "react";
 import gsap from "gsap";
 import LetsTalkButton from "./ui/LetsTalkButton";
+
+// Runs as useLayoutEffect on client (before paint) and useEffect on server (no-op)
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export type Project = {
   _id: string;
@@ -97,7 +101,7 @@ function BracketCTA() {
           Discover how my creativity transforms ideas into impactful digital
           experiences — schedule a call with me to get started.
         </p>
-        <LetsTalkButton href="#contact" />
+        <LetsTalkButton href="#contact" noHoverInvert />
       </div>
     </div>
   );
@@ -131,113 +135,137 @@ function useCardHover(count: number) {
     });
   };
 
-  // suppress unused-variable warning for count
   void count;
 
   return { refs, enter, leave };
 }
 
 export default function WorkSection({ projects }: { projects: Project[] }) {
-  const d = useCardHover(projects.length); // desktop
-  const m = useCardHover(projects.length); // mobile
+  const d = useCardHover(projects.length);
+  const m = useCardHover(projects.length);
+
+  // null = not yet measured (SSR / before first paint)
+  // false = desktop, true = mobile
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // isMobile !== true  →  null (SSR default) or false (confirmed desktop)
+  const showDesktop = isMobile !== true;
+  const showMobile  = isMobile === true;
 
   return (
     <section className="bg-white w-full px-8 py-20 max-md:px-4 max-md:py-12">
 
-      {/* ── Header ── */}
-      <div className="hidden md:flex items-start justify-between mb-[61px]">
-        <div className="flex items-start gap-[10px]">
-          <div className="font-inter font-light text-[96px] leading-[0.86] tracking-[-0.08em] uppercase text-black">
-            <p>Selected</p>
-            <p>Work</p>
+      {/* ── Desktop header ── */}
+      {showDesktop && (
+        <div className="flex items-start justify-between mb-[61px]">
+          <div className="flex items-start gap-[10px]">
+            <div className="font-inter font-light text-[96px] leading-[0.86] tracking-[-0.08em] uppercase text-black">
+              <p>Selected</p>
+              <p>Work</p>
+            </div>
+            <span className="font-mono text-[14px] leading-[1.1] text-[#1f1f1f] mt-1">004</span>
           </div>
-          <span className="font-mono text-[14px] leading-[1.1] text-[#1f1f1f] mt-1">004</span>
+          <div className="flex items-center justify-center w-[15px] h-[110px]">
+            <p className="font-mono text-[14px] leading-[1.1] uppercase text-[#1f1f1f] whitespace-nowrap -rotate-90">
+              [ portfolio ]
+            </p>
+          </div>
         </div>
-        <div className="flex items-center justify-center w-[15px] h-[110px]">
-          <p className="font-mono text-[14px] leading-[1.1] uppercase text-[#1f1f1f] whitespace-nowrap -rotate-90">
-            [ portfolio ]
-          </p>
-        </div>
-      </div>
+      )}
 
-      <div className="flex md:hidden flex-col gap-4 mb-8">
-        <p className="font-mono text-[14px] leading-[1.1] uppercase text-[#1f1f1f]">[ portfolio ]</p>
-        <div className="flex items-start justify-between">
-          <div className="font-inter font-light text-[32px] leading-[0.86] tracking-[-0.08em] uppercase text-black">
-            <p>Selected</p>
-            <p>Work</p>
+      {/* ── Mobile header ── */}
+      {showMobile && (
+        <div className="flex flex-col gap-4 mb-8">
+          <p className="font-mono text-[14px] leading-[1.1] uppercase text-[#1f1f1f]">[ portfolio ]</p>
+          <div className="flex items-start justify-between">
+            <div className="font-inter font-light text-[32px] leading-[0.86] tracking-[-0.08em] uppercase text-black">
+              <p>Selected</p>
+              <p>Work</p>
+            </div>
+            <span className="font-mono text-[14px] leading-[1.1] text-[#1f1f1f]">004</span>
           </div>
-          <span className="font-mono text-[14px] leading-[1.1] text-[#1f1f1f]">004</span>
         </div>
-      </div>
+      )}
 
       {/* ── Desktop: two staggered columns ── */}
-      <div className="hidden md:flex gap-6 items-end">
-        {/* Left column */}
-        <div className="flex flex-1 flex-col justify-between self-stretch">
-          {projects[0] && (
-            <div
-              ref={(el) => { d.refs.current[0] = el; }}
-              onMouseEnter={() => d.enter(0)}
-              onMouseLeave={() => d.leave(0)}
-              className="relative cursor-pointer"
-            >
-              <ProjectCard img={projects[0].imageUrl} title={projects[0].title} tags={projects[0].tags} tall={projects[0].isTall} />
-            </div>
-          )}
-          {projects[1] && (
-            <div
-              ref={(el) => { d.refs.current[1] = el; }}
-              onMouseEnter={() => d.enter(1)}
-              onMouseLeave={() => d.leave(1)}
-              className="relative cursor-pointer"
-            >
-              <ProjectCard img={projects[1].imageUrl} title={projects[1].title} tags={projects[1].tags} tall={projects[1].isTall} />
-            </div>
-          )}
-          <BracketCTA />
-        </div>
+      {showDesktop && (
+        <div className="flex gap-6 items-end">
+          {/* Left column */}
+          <div className="flex flex-1 flex-col justify-between self-stretch">
+            {projects[0] && (
+              <div
+                ref={(el) => { d.refs.current[0] = el; }}
+                onMouseEnter={() => d.enter(0)}
+                onMouseLeave={() => d.leave(0)}
+                className="relative cursor-pointer"
+              >
+                <ProjectCard img={projects[0].imageUrl} title={projects[0].title} tags={projects[0].tags} tall={projects[0].isTall} />
+              </div>
+            )}
+            {projects[1] && (
+              <div
+                ref={(el) => { d.refs.current[1] = el; }}
+                onMouseEnter={() => d.enter(1)}
+                onMouseLeave={() => d.leave(1)}
+                className="relative cursor-pointer"
+              >
+                <ProjectCard img={projects[1].imageUrl} title={projects[1].title} tags={projects[1].tags} tall={projects[1].isTall} />
+              </div>
+            )}
+            <BracketCTA />
+          </div>
 
-        {/* Right column */}
-        <div className="flex flex-1 flex-col gap-[117px] pt-[240px]">
-          {projects[2] && (
-            <div
-              ref={(el) => { d.refs.current[2] = el; }}
-              onMouseEnter={() => d.enter(2)}
-              onMouseLeave={() => d.leave(2)}
-              className="relative cursor-pointer"
-            >
-              <ProjectCard img={projects[2].imageUrl} title={projects[2].title} tags={projects[2].tags} tall={projects[2].isTall} />
-            </div>
-          )}
-          {projects[3] && (
-            <div
-              ref={(el) => { d.refs.current[3] = el; }}
-              onMouseEnter={() => d.enter(3)}
-              onMouseLeave={() => d.leave(3)}
-              className="relative cursor-pointer"
-            >
-              <ProjectCard img={projects[3].imageUrl} title={projects[3].title} tags={projects[3].tags} tall={projects[3].isTall} />
-            </div>
-          )}
+          {/* Right column */}
+          <div className="flex flex-1 flex-col gap-[117px] pt-[240px]">
+            {projects[2] && (
+              <div
+                ref={(el) => { d.refs.current[2] = el; }}
+                onMouseEnter={() => d.enter(2)}
+                onMouseLeave={() => d.leave(2)}
+                className="relative cursor-pointer"
+              >
+                <ProjectCard img={projects[2].imageUrl} title={projects[2].title} tags={projects[2].tags} tall={projects[2].isTall} />
+              </div>
+            )}
+            {projects[3] && (
+              <div
+                ref={(el) => { d.refs.current[3] = el; }}
+                onMouseEnter={() => d.enter(3)}
+                onMouseLeave={() => d.leave(3)}
+                className="relative cursor-pointer"
+              >
+                <ProjectCard img={projects[3].imageUrl} title={projects[3].title} tags={projects[3].tags} tall={projects[3].isTall} />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Mobile: single column ── */}
-      <div className="flex md:hidden flex-col gap-12">
-        {projects.map((p, i) => (
-          <div
-            key={p._id}
-            ref={(el) => { m.refs.current[i] = el; }}
-            onMouseEnter={() => m.enter(i)}
-            onMouseLeave={() => m.leave(i)}
-            className="relative cursor-pointer"
-          >
-            <ProjectCard img={p.imageUrl} title={p.title} tags={p.tags} tall={false} />
-          </div>
-        ))}
-        <BracketCTA />
-      </div>
+      {showMobile && (
+        <div className="flex flex-col gap-12">
+          {projects.map((p, i) => (
+            <div
+              key={p._id}
+              ref={(el) => { m.refs.current[i] = el; }}
+              onMouseEnter={() => m.enter(i)}
+              onMouseLeave={() => m.leave(i)}
+              className="relative cursor-pointer"
+            >
+              <ProjectCard img={p.imageUrl} title={p.title} tags={p.tags} tall={false} />
+            </div>
+          ))}
+          <BracketCTA />
+        </div>
+      )}
 
     </section>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 
 const IMG_1 = "https://www.figma.com/api/mcp/asset/eed0d90b-959f-46be-8862-025f6caafc5c";
@@ -57,6 +57,8 @@ function ArticleCard({ img, text, tall }: { img: string; text: string; tall: boo
 function MobileCarousel() {
   const [current, setCurrent] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dotsRef  = useRef<(HTMLButtonElement | null)[]>([]);
 
   const prev = () => setCurrent((c) => Math.max(0, c - 1));
   const next = () => setCurrent((c) => Math.min(ARTICLES.length - 1, c + 1));
@@ -70,13 +72,24 @@ function MobileCarousel() {
     setTouchStartX(null);
   };
 
+  useEffect(() => {
+    dotsRef.current.forEach((dot, i) => {
+      if (dot) gsap.set(dot, { backgroundColor: i === 0 ? "#000000" : "rgba(0,0,0,0.2)" });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (trackRef.current)
+      gsap.to(trackRef.current, { x: `-${current * 100}%`, duration: 0.3, ease: "power2.inOut" });
+    dotsRef.current.forEach((dot, i) => {
+      if (dot) gsap.to(dot, { backgroundColor: i === current ? "#000000" : "rgba(0,0,0,0.2)", duration: 0.2, ease: "none" });
+    });
+  }, [current]);
+
   return (
     <div>
       <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-        <div
-          className="flex transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${current * 100}%)` }}
-        >
+        <div ref={trackRef} className="flex">
           {ARTICLES.map((a, i) => (
             <div key={i} className="w-full shrink-0">
               <ArticleCard img={a.img} text={a.text} tall={false} />
@@ -89,11 +102,10 @@ function MobileCarousel() {
         {ARTICLES.map((_, i) => (
           <button
             key={i}
+            ref={(el) => { dotsRef.current[i] = el; }}
             onClick={() => setCurrent(i)}
             aria-label={`Go to slide ${i + 1}`}
-            className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-              i === current ? "bg-black" : "bg-black/20"
-            }`}
+            className="w-2 h-2 rounded-full"
           />
         ))}
       </div>

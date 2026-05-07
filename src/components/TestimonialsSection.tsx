@@ -40,6 +40,8 @@ export default function TestimonialsSection() {
   const [idx, setIdx] = useState(0);
   const cardRefs  = useRef<(HTMLDivElement | null)[]>([]);
   const activeIdx = useRef<number | null>(null);
+  const trackRef  = useRef<HTMLDivElement>(null);
+  const dotsRef   = useRef<(HTMLButtonElement | null)[]>([]);
 
   const prev = () => setIdx((i) => (i - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
   const next = () => setIdx((i) => (i + 1) % TESTIMONIALS.length);
@@ -48,7 +50,18 @@ export default function TestimonialsSection() {
     cardRefs.current.forEach((el, i) => {
       if (el) gsap.set(el, { rotation: TESTIMONIALS[i].rotateDeg });
     });
+    dotsRef.current.forEach((dot, i) => {
+      if (dot) gsap.set(dot, { backgroundColor: i === 0 ? "#000000" : "#d1d5db" });
+    });
   }, []);
+
+  useEffect(() => {
+    if (trackRef.current)
+      gsap.to(trackRef.current, { x: `-${idx * 100}%`, duration: 0.5, ease: "power2.inOut" });
+    dotsRef.current.forEach((dot, i) => {
+      if (dot) gsap.to(dot, { backgroundColor: i === idx ? "#000000" : "#d1d5db", duration: 0.2, ease: "none" });
+    });
+  }, [idx]);
 
   const onEnter = (i: number) => {
     if (activeIdx.current === i) return;
@@ -114,10 +127,7 @@ export default function TestimonialsSection() {
         </p>
 
         <div className="overflow-hidden">
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${idx * 100}%)` }}
-          >
+          <div ref={trackRef} className="flex">
             {TESTIMONIALS.map((t) => (
               <div key={t.name} className="w-full shrink-0 flex justify-center py-4">
                 <div
@@ -141,9 +151,10 @@ export default function TestimonialsSection() {
             {TESTIMONIALS.map((_, i) => (
               <button
                 key={i}
+                ref={(el) => { dotsRef.current[i] = el; }}
                 onClick={() => setIdx(i)}
                 aria-label={`Go to testimonial ${i + 1}`}
-                className={`w-2 h-2 rounded-full transition-colors ${i === idx ? "bg-black" : "bg-gray-300"}`}
+                className="w-2 h-2 rounded-full"
               />
             ))}
           </div>

@@ -61,7 +61,7 @@ export default function PhotoSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="w-full overflow-hidden">
+    <section ref={sectionRef} data-nav-theme="dark" className="w-full overflow-hidden">
       {/* Desktop */}
       <div className="hidden md:block w-full aspect-[3/2]">
         <img

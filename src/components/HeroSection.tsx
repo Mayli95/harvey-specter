@@ -55,7 +55,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative h-[847px] w-full overflow-hidden">
+    <section ref={sectionRef} data-nav-theme="dark" className="relative h-[847px] w-full overflow-hidden">
       {/* Background images */}
       <img
         ref={bgDesktopRef}

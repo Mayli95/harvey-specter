@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { ContactModalProvider } from "@/context/ContactModalContext";
+import ContactModal from "@/components/ContactModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +40,12 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${playfairDisplay.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ContactModalProvider>
+          {children}
+          <ContactModal />
+        </ContactModalProvider>
+      </body>
     </html>
   );
 }
